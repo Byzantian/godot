@@ -3959,6 +3959,7 @@ void SpatialEditorViewportContainer::_notification(int p_what) {
 				viewports[3]->_menu_option(SpatialEditorViewport::VIEW_LEFT);
 
 				auto sp = Object::cast_to<SpatialEditor>(get_parent()->get_parent()->get_parent());
+				auto sp_parent = sp->get_parent();
 
 				bool grid_active = sp->view_menu->get_popup()->is_item_checked(
 						sp->view_menu->get_popup()->get_item_index(SpatialEditor::MENU_VIEW_GRID));
@@ -4420,6 +4421,8 @@ void SpatialEditor::_menu_item_pressed(int p_option) {
 			update_transform_gizmo();
 
 		} break;
+
+
 		case MENU_TRANSFORM_CONFIGURE_SNAP: {
 
 			snap_dialog->popup_centered(Size2(200, 180));
@@ -5306,6 +5309,13 @@ void SpatialEditor::_notification(int p_what) {
 		tool_option_button[SpatialEditor::TOOL_OPT_LOCAL_COORDS]->set_icon(get_icon("Object", "EditorIcons"));
 		tool_option_button[SpatialEditor::TOOL_OPT_USE_SNAP]->set_icon(get_icon("Snap", "EditorIcons"));
 
+		tool_button[SpatialEditor::TOOL_BRUSH_SELECT]->set_icon(get_icon("ToolSelect", "EditorIcons"));
+		tool_button[SpatialEditor::TOOL_BRUSH_BLOCK]->set_icon(get_icon("Object", "EditorIcons"));
+		tool_button[SpatialEditor::TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE]->set_icon(get_icon("Object", "EditorIcons"));
+		tool_button[SpatialEditor::TOOL_BRUSH_APPLY_TEXTURE]->set_icon(get_icon("Object", "EditorIcons"));
+		tool_button[SpatialEditor::TOOL_BRUSH_CLIPPING]->set_icon(get_icon("Object", "EditorIcons"));
+		tool_button[SpatialEditor::TOOL_BRUSH_VERTEX]->set_icon(get_icon("Object", "EditorIcons"));
+
 		view_menu->get_popup()->set_item_icon(view_menu->get_popup()->get_item_index(MENU_VIEW_USE_1_VIEWPORT), get_icon("Panels1", "EditorIcons"));
 		view_menu->get_popup()->set_item_icon(view_menu->get_popup()->get_item_index(MENU_VIEW_USE_2_VIEWPORTS), get_icon("Panels2", "EditorIcons"));
 		view_menu->get_popup()->set_item_icon(view_menu->get_popup()->get_item_index(MENU_VIEW_USE_2_VIEWPORTS_ALT), get_icon("Panels2Alt", "EditorIcons"));
@@ -5645,6 +5655,75 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	sct = ED_GET_SHORTCUT("spatial_editor/snap").ptr()->get_as_text();
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_tooltip(vformat(TTR("Snap Mode (%s)"), sct));
 
+	// CSG Brush Tools
+
+	hbc_menu->add_child(memnew(VSeparator));
+	hbc_menu->add_child(memnew(VSeparator));
+
+	tool_button[TOOL_BRUSH_SELECT] = memnew(ToolButton);
+	hbc_menu->add_child(tool_button[TOOL_BRUSH_SELECT]);
+	tool_button[TOOL_BRUSH_SELECT]->set_toggle_mode(false);
+	tool_button[TOOL_BRUSH_SELECT]->set_flat(false);
+	tool_button[TOOL_BRUSH_SELECT]->connect("pressed", this, "_menu_item_pressed", button_binds);
+	button_binds.write[0] = TOOL_BRUSH_SELECT;
+	ED_SHORTCUT("spatial_editor/brush_select", TTR("Select Brush"), KEY_S + KEY_MASK_SHIFT);
+	sct = ED_GET_SHORTCUT("spatial_editor/brush_select").ptr()->get_as_text();
+	tool_button[TOOL_BRUSH_SELECT]->set_tooltip(vformat(TTR("Brush Selection Tool (%s)"), sct));
+
+	hbc_menu->add_child(memnew(VSeparator));
+
+	tool_button[TOOL_BRUSH_BLOCK] = memnew(ToolButton);
+	hbc_menu->add_child(tool_button[TOOL_BRUSH_BLOCK]);
+	tool_button[TOOL_BRUSH_BLOCK]->set_toggle_mode(false);
+	tool_button[TOOL_BRUSH_BLOCK]->set_flat(false);
+	tool_button[TOOL_BRUSH_BLOCK]->connect("pressed", this, "_menu_item_pressed", button_binds);
+	button_binds.write[0] = TOOL_BRUSH_BLOCK;
+	ED_SHORTCUT("spatial_editor/brush_block", TTR("Block Tool"), KEY_B + KEY_MASK_SHIFT);
+	sct = ED_GET_SHORTCUT("spatial_editor/brush_block").ptr()->get_as_text();
+	tool_button[TOOL_BRUSH_BLOCK]->set_tooltip(vformat(TTR("Block Tool (%s)"), sct));
+
+	hbc_menu->add_child(memnew(VSeparator));
+
+	tool_button[TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE] = memnew(ToolButton);
+	hbc_menu->add_child(tool_button[TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE]);
+	tool_button[TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE]->set_toggle_mode(true);
+	tool_button[TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE]->set_flat(false);
+	tool_button[TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE]->connect("toggled", this, "_menu_item_toggled", button_binds);
+	button_binds.write[0] = TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE;
+	ED_SHORTCUT("spatial_editor/brush_apply_menu", TTR("Apply Menu Tool"), KEY_A + KEY_MASK_SHIFT);
+	sct = ED_GET_SHORTCUT("spatial_editor/brush_apply_menu").ptr()->get_as_text();
+	tool_button[TOOL_BRUSH_TEXTURE_APPLICATION_TOGGLE]->set_tooltip(vformat(TTR("Toggle Texture Application (%s)"), sct));
+
+	tool_button[TOOL_BRUSH_APPLY_TEXTURE] = memnew(ToolButton);
+	hbc_menu->add_child(tool_button[TOOL_BRUSH_APPLY_TEXTURE]);
+	tool_button[TOOL_BRUSH_APPLY_TEXTURE]->set_toggle_mode(false);
+	tool_button[TOOL_BRUSH_APPLY_TEXTURE]->set_flat(false);
+	tool_button[TOOL_BRUSH_APPLY_TEXTURE]->connect("pressed", this, "_menu_item_pressed", button_binds);
+	button_binds.write[0] = TOOL_BRUSH_APPLY_TEXTURE;
+	tool_button[TOOL_BRUSH_APPLY_TEXTURE]->set_tooltip(vformat(TTR("Apply Current Texture"), sct));
+
+	tool_button[TOOL_BRUSH_CLIPPING] = memnew(ToolButton);
+	hbc_menu->add_child(tool_button[TOOL_BRUSH_CLIPPING]);
+	tool_button[TOOL_BRUSH_CLIPPING]->set_toggle_mode(false);
+	tool_button[TOOL_BRUSH_CLIPPING]->set_flat(false);
+	tool_button[TOOL_BRUSH_CLIPPING]->connect("pressed", this, "_menu_item_pressed", button_binds);
+	button_binds.write[0] = TOOL_BRUSH_CLIPPING;
+	ED_SHORTCUT("spatial_editor/brush_clip", TTR("Clip Tool"), KEY_X + KEY_MASK_SHIFT);
+	sct = ED_GET_SHORTCUT("spatial_editor/brush_clip").ptr()->get_as_text();
+	tool_button[TOOL_BRUSH_CLIPPING]->set_tooltip(vformat(TTR("Clipping Tool (%s)"), sct));
+
+	tool_button[TOOL_BRUSH_VERTEX] = memnew(ToolButton);
+	hbc_menu->add_child(tool_button[TOOL_BRUSH_VERTEX]);
+	tool_button[TOOL_BRUSH_VERTEX]->set_toggle_mode(false);
+	tool_button[TOOL_BRUSH_VERTEX]->set_flat(false);
+	tool_button[TOOL_BRUSH_VERTEX]->connect("pressed", this, "_menu_item_pressed", button_binds);
+	button_binds.write[0] = TOOL_BRUSH_VERTEX;
+	ED_SHORTCUT("spatial_editor/brush_vertex", TTR("Vertex Tool"), KEY_V + KEY_MASK_SHIFT);
+	sct = ED_GET_SHORTCUT("spatial_editor/brush_vertex").ptr()->get_as_text();
+	tool_button[TOOL_BRUSH_VERTEX]->set_tooltip(vformat(TTR("Vertex Tool (%s)"), sct));
+
+	//*###############
+
 	hbc_menu->add_child(memnew(VSeparator));
 
 	// Drag and drop support;
@@ -5669,6 +5748,8 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	ED_SHORTCUT("spatial_editor/tool_scale", TTR("Tool Scale"), KEY_R);
 
 	ED_SHORTCUT("spatial_editor/freelook_toggle", TTR("Toggle Freelook"), KEY_MASK_SHIFT + KEY_F);
+
+
 
 	PopupMenu *p;
 
