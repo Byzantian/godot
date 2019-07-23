@@ -143,6 +143,8 @@ class SpatialEditorViewport : public Control {
 
 	GDCLASS(SpatialEditorViewport, Control);
 	friend class SpatialEditor;
+	friend class SpatialEditorViewportContainer;
+
 	enum {
 
 		VIEW_TOP,
@@ -441,6 +443,7 @@ public:
 		VIEW_USE_3_VIEWPORTS,
 		VIEW_USE_3_VIEWPORTS_ALT,
 		VIEW_USE_4_VIEWPORTS,
+		VIEW_USE_4_VIEWPORTS_ALT,
 	};
 
 private:
@@ -567,6 +570,7 @@ private:
 		MENU_VIEW_USE_3_VIEWPORTS,
 		MENU_VIEW_USE_3_VIEWPORTS_ALT,
 		MENU_VIEW_USE_4_VIEWPORTS,
+		MENU_VIEW_USE_4_VIEWPORTS_ALT,
 		MENU_VIEW_ORIGIN,
 		MENU_VIEW_GRID,
 		MENU_VIEW_GIZMOS_3D_ICONS,
