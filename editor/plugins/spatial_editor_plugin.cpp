@@ -3958,6 +3958,14 @@ void SpatialEditorViewportContainer::_notification(int p_what) {
 				viewports[2]->_menu_option(SpatialEditorViewport::VIEW_FRONT);
 				viewports[3]->_menu_option(SpatialEditorViewport::VIEW_LEFT);
 
+				auto sp = Object::cast_to<SpatialEditor>(get_parent()->get_parent()->get_parent());
+
+				bool grid_active = sp->view_menu->get_popup()->is_item_checked(
+						sp->view_menu->get_popup()->get_item_index(SpatialEditor::MENU_VIEW_GRID));
+
+				if(grid_active)
+					sp->_menu_item_pressed(SpatialEditor::MENU_VIEW_GRID);
+
 				fit_child_in_rect(viewports[0], Rect2(Vector2(), Vector2(size_left, size_top)));
 				fit_child_in_rect(viewports[1], Rect2(Vector2(mid_w + h_sep / 2, 0), Vector2(size_right, size_top)));
 				fit_child_in_rect(viewports[2], Rect2(Vector2(0, mid_h + v_sep / 2), Vector2(size_left, size_bottom)));

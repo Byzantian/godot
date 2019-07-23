@@ -476,6 +476,7 @@ public:
 class SpatialEditor : public VBoxContainer {
 
 	GDCLASS(SpatialEditor, VBoxContainer);
+	friend class SpatialEditorViewportContainer;
 
 public:
 	static const unsigned int VIEWPORTS_COUNT = 4;
