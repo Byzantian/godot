@@ -520,6 +520,7 @@ private:
 	SpatialEditorViewport *viewports[VIEWPORTS_COUNT];
 	VSplitContainer *shader_split;
 	HSplitContainer *palette_split;
+	HSplitContainer* brush_tool_split;
 
 	/////
 
@@ -631,6 +632,7 @@ private:
 	void _menu_gizmo_toggled(int p_option);
 
 	HBoxContainer *hbc_menu;
+	Container *brush_menu;
 
 	void _generate_selection_box();
 	UndoRedo *undo_redo;
